@@ -1,10 +1,10 @@
 from app import app, __init__
 from flask import jsonify, make_response, request
 from dbhelpers import run_statement
-import uuid
 import bcrypt
+import uuid
 
-@app.post('api/user')
+@app.post('/api/user')
 def user_signup():
     username = request.json.get("username")
     pw = request.json.get("password")
@@ -16,9 +16,9 @@ def user_signup():
     dob = request.json.get("dob YYYY/MM/DD")
     token = uuid.uuid4().hex
     image = request.json.get("profile image")
-    keys = ["userID", "token"]
+    keys = ["userId", "token"]
     response = []
-    result = run_statement("CALL user_signup(?, ?, ?, ?)", [username, password, email, dob, token, image])
+    result = run_statement("CALL user_signup(?, ?, ?, ?, ?, ?)", [username, password, email, dob, token, image])
     if (type(result) == list):
         for data in result:
             response.append(dict(zip(keys, data)))

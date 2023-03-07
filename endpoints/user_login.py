@@ -4,10 +4,10 @@ from dbhelpers import run_statement
 import bcrypt
 import uuid
 
-@app.post('api/user-login')
+@app.post('/api/user-login')
 def user_login():
     username = request.json.get("username")
-    result = run_statement("CALL get_id(?)", [username])
+    result = run_statement("CALL get_user_id(?)", [username])
     if (result == []):
         return "Please enter a valid username or register as a new user."
     if (type(result) == list):
