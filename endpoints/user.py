@@ -6,6 +6,8 @@ import uuid
 
 @app.post('/api/user')
 def user_signup():
+    first_name = request.json.get("firstName")
+    last_name = request.json.get("lastName")
     username = request.json.get("username")
     pw = request.json.get("password")
     if pw == None:
@@ -16,13 +18,15 @@ def user_signup():
     dob = request.json.get("dob")
     token = uuid.uuid4().hex
     image = request.json.get("profile image")
-    keys = ["userId", "token"]
-    response = []
-    result = run_statement("CALL user_signup(?, ?, ?, ?, ?, ?)", [username, password, email, dob, token, image])
+    result = run_statement("CALL user_signup(?, ?, ?, ?, ?, ?, ?, ?)", [username, password, email, dob, token, image, first_name, last_name])
     if (type(result) == list):
-        for data in result:
-            response.append(dict(zip(keys, data)))
-            return make_response(jsonify(response), 200)
+        user_id = result[0][0]
+        token = result[0][1]
+        response = {
+            "userId": user_id,
+            "token": token
+        }
+        return make_response(jsonify(response), 200)
     if "Duplicate entry" in result:
         return "That username is already taken. Please choose another name."
     else:
@@ -36,7 +40,7 @@ def user_get():
     username = request.args.get("username")
     result = run_statement("CALL get_user_id(?, ?)", [username, token])
     response = []
-    keys = ["userId", "email", "username", "image", "createdAt"]
+    keys = ["userId", "email", "username", "firstName", "lastName", "image", "createdAt", "dob", "token"]
     if (type(result) == list):
         for user in result:
             response.append(dict(zip(keys, user)))
@@ -50,7 +54,41 @@ def user_edit():
     if token == None:
         return "You are not logged in. Please login to update your profile."
     username = request.json.get("username")
-    password = request.json.get("password")
+    email = request.json.get("email")
+    last_name = request.json.get("lastName")
+    image = request.json.get("image")
     result = run_statement("CALL get_user_id(?, ?)", [username, token])
-    print(result)
-                
+    if (type(result) == list):
+        user_id = result[0][0]
+        if email and last_name and image != None:
+            result = run_statement("CALL patch_all(?, ?, ?, ?)", [user_id, email, last_name, image])
+            if result == None:
+                return "You've successfully updated your info."
+        else:
+            result = run_statement("CALL patch_user(?, ?, ?, ?, ?)", [token, user_id, image, last_name, email])
+            if result == None:
+                return "You've successfully updated your info."
+            else:
+                return "uh oh."
+    else:
+        return "hmmm."
+    
+    # the answers have to be in a separate table (FK that points to the question)
+    # assume the api is a question and the array of possible answers, object being sent over, a question and a bunch of answers
+    # if the wf gets interrupted
+    # assuming that the q and i come 
+    # then handle the answering polls wf
+    # finished teh signup/login wf
+    # next is the base of the abaility to create polls, edit polls but probably, you can edit the answers before you publish them
+    # which gives the pool to make it live
+    # two types of accounts
+    # anybody can participate in a poll, creating a poll and launching it
+    # the next one is the actual options or a way to view polls
+    # invitation by link or whoever and whatever
+    # pool categories
+    # some with expiry dates 
+    # the scenarios with people that use the serve 
+    # a real design principal, where you imagine personas that use the serve
+    # think of the workflow that you're going t obe polling through
+    # is. the next office outing out of a few
+    # imagine the system the way that I want it, which is why we limit the definitive advice
