@@ -40,7 +40,7 @@ def user_logout():
     if (type(result) == list):
         session_id = result[0][0]
         result = run_statement("CALL user_logout(?)", [session_id])
-        if result ==[1]:
+        if len(result) == 1:
             return "You have successfully logged out."
     else:
         return "Please try again."
