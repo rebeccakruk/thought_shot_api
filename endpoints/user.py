@@ -63,7 +63,7 @@ def user_edit():
         if last_name != None and email == None and image == None:
             result = run_statement("CALL patch_user(?, ?)", [user_id, last_name])
             if result == None:
-                return "You've successfully updated your info."
+                return f"You've successfully updated your last name to {last_name}."
         if last_name != None and email != None and image == None:
             result = run_statement("CALL patch_ln_email(?, ?, ?)", [user_id, last_name, email])
             if result == None:
