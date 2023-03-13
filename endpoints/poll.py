@@ -16,9 +16,10 @@ def create_poll():
     invite = request.json.get("inviteOnly")
     limits = request.json.get("limits")
     result = run_statement("CALL get_user_id(?, ?)", [username, token])
+    poll_owner_cert = request.json.get("pollOwnerCert")
     if (type(result) == list):
         owner_id = result[0][0]
-        result = run_statement("CALL create_poll(?, ?, ?, ?, ?, ?)", [owner_id, title, category, expiry, invite, limits])
+        result = run_statement("CALL create_poll(?, ?, ?, ?, ?, ?, ?)", [owner_id, title, category, expiry, invite, limits, poll_owner_cert])
         if (type(result) == list):
             poll_id = result[0][2]
             return f"You've created a new poll, {title}, id: {poll_id}."
@@ -45,3 +46,34 @@ def add_questions():
         print(result)
 
         result = run_statement("CALL create_choices")
+
+@app.get('/api/poll')
+def get_polls():
+    token = request.args.get("token")
+    username = request.args.get("username")
+    user_id = request.args.get("userId")
+    response = []
+    keys = ["pollId", "title", "description", "category", "pollOwner", "expiry", "createdAt"]
+    if token == None:
+        result = run_statement("CALL get_all_polls(?)", [user_id])
+        if (type(result) == list):
+            for poll in result:
+                response.append(dict(zip(keys, poll)))
+            return make_response(jsonify(response), 200)
+    if token != None:
+        result = run_statement("CALL get_user_id(?, ?)", [username, token])
+        if (type(result) == list):
+            owner_id = result[0][0]
+            result = run_statement("CALL get_polls_by_owner(?)", [owner_id])
+            if result == []:
+                result = run_statement("CALL get_all_polls(?)", [user_id])
+                if (type(result) == list):
+                    for poll in result:
+                        response.append(dict(zip(keys, poll)))
+                    return make_response(jsonify(response), 200)
+            elif (type(result) == list):
+                for polls in result:
+                    response.append(dict(zip(keys, polls)))
+                return make_response(jsonify(response), 200)
+    else:
+        return make_response(jsonify(result), 500)

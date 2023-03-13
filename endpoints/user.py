@@ -39,7 +39,7 @@ def user_get():
     username = request.args.get("username")
     result = run_statement("CALL get_user_id(?, ?)", [username, token])
     response = []
-    keys = ["userId", "email", "username", "firstName", "lastName", "createdAt", "dob", "token"]
+    keys = ["userId", "email", "username", "lastName", "firstName", "createdAt", "dob", "token"]
     if (type(result) == list):
         for user in result:
             response.append(dict(zip(keys, user)))
