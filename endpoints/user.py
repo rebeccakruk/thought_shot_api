@@ -17,8 +17,7 @@ def user_signup():
     email = request.json.get("email")
     dob = request.json.get("dob")
     token = uuid.uuid4().hex
-    image = request.json.get("profile image")
-    result = run_statement("CALL user_signup(?, ?, ?, ?, ?, ?, ?, ?)", [username, password, email, dob, token, image, first_name, last_name])
+    result = run_statement("CALL user_signup(?, ?, ?, ?, ?, ?, ?, ?)", [username, password, email, dob, token, first_name, last_name])
     if (type(result) == list):
         user_id = result[0][0]
         token = result[0][1]
@@ -40,7 +39,7 @@ def user_get():
     username = request.args.get("username")
     result = run_statement("CALL get_user_id(?, ?)", [username, token])
     response = []
-    keys = ["userId", "email", "username", "firstName", "lastName", "image", "createdAt", "dob", "token"]
+    keys = ["userId", "email", "username", "firstName", "lastName", "createdAt", "dob", "token"]
     if (type(result) == list):
         for user in result:
             response.append(dict(zip(keys, user)))
@@ -55,41 +54,37 @@ def user_edit():
         return "You are not logged in. Please login to update your profile."
     username = request.json.get("username")
     email = request.json.get("email")
+    first_name = request.json.get("firstName")
     last_name = request.json.get("lastName")
-    image = request.json.get("image")
     result = run_statement("CALL get_user_id(?, ?)", [username, token])
     if (type(result) == list):
         user_id = result[0][0]
-        if last_name != None and email == None and image == None:
-            result = run_statement("CALL patch_user(?, ?)", [user_id, last_name])
+        if last_name != None and email == None and first_name == None:
+            result = run_statement("CALL patch_ln(?, ?)", [user_id, last_name])
             if result == None:
                 return f"You've successfully updated your last name to {last_name}."
-        if last_name != None and email != None and image == None:
+        if last_name != None and email != None and first_name == None:
             result = run_statement("CALL patch_ln_email(?, ?, ?)", [user_id, last_name, email])
             if result == None:
                 return "You've successfully updated your info."
-        if last_name != None and email == None and image != None:
-            result = run_statement("CALL patch_ln_image(?, ?, ?)", [user_id, last_name, image])
+        if last_name != None and email == None and first_name != None:
+            result = run_statement("CALL patch_fn_ln(?, ?, ?)", [user_id, first_name, last_name])
             if result == None:
                 return "You've successfully updated your info."
-        if email != None and last_name == None and image == None:
+        if email != None and last_name == None and first_name == None:
             result = run_statement("CALL patch_email(?, ?)", [user_id, email])
             if result == None:
                 return "You've successfully updated your info."
-        if email != None and last_name == None and image != None:
-            result = run_statement("CALL patch_email_image(?, ?, ?)", [user_id, email, image])
+        if email != None and last_name == None and first_name != None:
+            result = run_statement("CALL patch_email_fn(?, ?, ?)", [user_id, email, first_name])
             if result == None:
                 return "You've successfully updated your info."
-        if image != None and last_name == None and email == None:
-            result = run_statement("CALL patch_image(?, ?)", [user_id, image])
-            if result == None:
-                return "You've successfully updated your info."
-        if email and last_name and image != None:
-            result = run_statement("CALL patch_all(?, ?, ?, ?)", [user_id, email, last_name, image])
+        if first_name != None and last_name == None and email == None:
+            result = run_statement("CALL patch_fn(?, ?)", [user_id, first_name])
             if result == None:
                 return "You've successfully updated your info."
         else:
-            result = run_statement("CALL patch_user(?, ?, ?, ?, ?)", [token, user_id, email, last_name, image])
+            result = run_statement("CALL patch_all(?, ?, ?, ?)", [user_id, email, last_name, first_name])
             if result == None:
                 return "You've successfully updated your info."
             else:
