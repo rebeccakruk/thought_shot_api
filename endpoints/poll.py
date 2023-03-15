@@ -52,14 +52,10 @@ def get_polls():
     token = request.args.get("token")
     username = request.args.get("username")
     user_id = request.args.get("userId")
+    cat_id = request.args.get("category")
+    cat_name = request.args.get("categoryName")
     response = []
-    keys = ["pollId", "title", "description", "category", "pollOwner", "expiry", "createdAt"]
-    if token == None:
-        result = run_statement("CALL get_all_polls(?)", [user_id])
-        if (type(result) == list):
-            for poll in result:
-                response.append(dict(zip(keys, poll)))
-            return make_response(jsonify(response), 200)
+    keys = ["pollId", "title", "description", "categoryName", "pollOwner", "expiry", "createdAt", "category"]
     if token != None:
         result = run_statement("CALL get_user_id(?, ?)", [username, token])
         if (type(result) == list):
@@ -68,12 +64,69 @@ def get_polls():
             if result == []:
                 result = run_statement("CALL get_all_polls(?)", [user_id])
                 if (type(result) == list):
-                    for poll in result:
-                        response.append(dict(zip(keys, poll)))
-                    return make_response(jsonify(response), 200)
+                    current_category = {}
+                for poll in result:
+                    current_category["pollId"] = poll[0]
+                    current_category["title"] = poll[1]
+                    current_category["description"] = poll[2]
+                    current_category["categoryName"] = poll[3]
+                    current_category["pollOwner"] = poll[4]
+                    current_category["expiry"] = poll[5]
+                    current_category["createdAt"] = poll[6]
+                    current_category["category"] = poll[7]
+                    if response != [] and poll[0] == response[-1]["pollId"]:
+                        response[-1]["category"].append(result)
+                    else:
+                        response.append(current_category)
+                        current_category = {}       
+                return make_response(jsonify(response), 200)
+                    # for poll in result:
+                    #     response.append(dict(zip(keys, poll)))
+                    # return make_response(jsonify(response), 200)
             elif (type(result) == list):
                 for polls in result:
                     response.append(dict(zip(keys, polls)))
                 return make_response(jsonify(response), 200)
+    if token == None and cat_name == None and cat_id == None:
+        result = run_statement("CALL get_all_polls(?)", [user_id])
+        if (type(result) == list):
+            current_category = {}
+            for poll in result:
+                current_category["pollId"] = poll[0]
+                current_category["title"] = poll[1]
+                current_category["description"] = poll[2]
+                current_category["categoryName"] = poll[3]
+                current_category["pollOwner"] = poll[4]
+                current_category["expiry"] = poll[5]
+                current_category["createdAt"] = poll[6]
+                current_category["category"] = poll[7]
+                if response != [] and poll[0] == response[-1]["pollId"]:
+                    response[-1]["category"].append(result)
+                else:
+                    response.append(current_category)
+                    current_category = {}       
+            return make_response(jsonify(response), 200)
+    if token == None and cat_name != None and cat_id == None:
+        result = run_statement("CALL get_polls_by_cat(?, ?)", [cat_id, cat_name])
+        if (type(result) == list):
+            for cat in result:
+                response.append(jsonify(response), 200)
+            else:
+                response.append(jsonify(result), 500)
+    
+    if token == None and cat_name == None and cat_id != None:
+        result = run_statement("CALL get_polls_by_cat(?, ?)", [cat_id, cat_name])
+        if (type(result) == list):
+            for cat in result:
+                response.append(jsonify(response), 200)
+            else:
+                response.append(jsonify(result), 500)
+    
+                # else:
+                #     current_category = {}
+    #             response.append(dict(zip(keys, poll)))
+                
+    #         return make_response(jsonify(response), 200)
     else:
-        return make_response(jsonify(result), 500)
+        return make_response(jsonify(response), 500)
+    
