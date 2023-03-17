@@ -111,3 +111,8 @@ def user_edit():
     # think of the workflow that you're going t obe polling through
     # is. the next office outing out of a few
     # imagine the system the way that I want it, which is why we limit the definitive advice
+
+
+    # Given the small amount of time remaining, we should at this point start budgeting our time.
+    #We need to decide which features make the cut.
+    
