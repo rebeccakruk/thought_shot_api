@@ -11,18 +11,23 @@ def create_poll():
         return "You are not logged in. Please login to update your profile."
     username = request.json.get("username")
     title = request.json.get("title")
+    description = request.json.get("description")
     category = request.json.get("category")
     expiry = request.json.get("expiry")
     invite = request.json.get("inviteOnly")
     limits = request.json.get("limits")
     result = run_statement("CALL get_user_id(?, ?)", [username, token])
-    poll_owner_cert = request.json.get("pollOwnerCert")
+    # poll_owner_cert = request.json.get("pollOwnerCert")
     if (type(result) == list):
         owner_id = result[0][0]
-        result = run_statement("CALL create_poll(?, ?, ?, ?, ?, ?, ?)", [owner_id, title, category, expiry, invite, limits, poll_owner_cert])
+        result = run_statement("CALL create_poll(?, ?, ?, ?, ?, ?, ?)", [owner_id, title, description, category, expiry, invite, limits])
         if (type(result) == list):
-            poll_id = result[0][2]
-            return f"You've created a new poll, {title}, id: {poll_id}."
+            response = {
+                    "title" : title,
+                    "category" : category,
+                    "pollId" : result[0][2]
+                }
+            return make_response(jsonify(response), 200)
         elif "Duplicate entry" in result:
             return f"{title} is already taken. Please choose a new name for your poll."
         else:
@@ -129,7 +134,7 @@ def get_polls():
     #         return make_response(jsonify(response), 200)
     else:
         return make_response(jsonify(response), 500)
-    
+
 @app.get('/api/poll-owner')
 def get_my_polls():
     token = request.args.get("token")
