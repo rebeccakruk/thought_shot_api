@@ -34,7 +34,7 @@ def create_poll():
             return "Something went wrong, please try again."
 
 
-@app.post('/api/poll/questions')
+@app.post('/api/poll-questions')
 def add_questions():
     token = request.json.get("token")
     if token == None:
@@ -46,11 +46,18 @@ def add_questions():
     if (type(result) == list):
         result = run_statement("CALL create_question(?, ?)", [poll_id, question])
         if (type(result) == list):
-            question_id = result[0][0]
-            return f"You've added: '{question}' to the poll. Id: {question_id}."
+            response = {
+                    "question" : question,
+                    "pollId" : poll_id,
+                    "questionId" : result[0][0]
+                }
+            return make_response(jsonify(response), 200)
+        # if (type(result) == list):
+        #     question_id = result[0][0]
+        #     return f"You've added: '{question}' to the poll. Id: {question_id}."
         print(result)
 
-        result = run_statement("CALL create_choices")
+        # result = run_statement("CALL create_choices")
 
 @app.get('/api/poll')
 def get_polls():

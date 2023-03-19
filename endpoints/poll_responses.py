@@ -16,8 +16,11 @@ def create_choices():
     if (type(result) == list):
         result = run_statement("CALL create_choices(?, ?)", [question_id, response_input])
         if (type(result) == list):
-            response_id = result[0][0]
-            return f"You've added: '{response_input}' to the poll. Id: {response_id}."
+            response = {
+                "responseOption" : response_input,
+                "responseId" : result[0][0]
+            }
+            return make_response(jsonify(response), 200)
         print(result)
 
         # the owner posts a question (one procedure, and is promted to post the response, one after the next in another procedure. the reponses to to a different table)
