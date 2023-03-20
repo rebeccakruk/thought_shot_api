@@ -15,9 +15,9 @@ def user_signup():
     salt = bcrypt.gensalt()
     password = bcrypt.hashpw(pw.encode(), salt)
     email = request.json.get("email")
-    dob = request.json.get("dob")
+
     token = uuid.uuid4().hex
-    result = run_statement("CALL user_signup(?, ?, ?, ?, ?, ?, ?, ?)", [username, password, email, dob, token, first_name, last_name])
+    result = run_statement("CALL user_signup(?, ?, ?, ?, ?, ?)", [username, password, email, token, first_name, last_name])
     if (type(result) == list):
         user_id = result[0][0]
         token = result[0][1]
