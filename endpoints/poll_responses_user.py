@@ -15,22 +15,34 @@ def get_qa():
     if (type(result) == list):
         current_option = {}
         for option in result:
+            current_option["title"] = option[5]
+            current_option["description"] = option[6]
             current_option["question"] = option[1]
-            current_option["responseOption"] = option[3]
+            # current_option["responseOption"] = option[3]
             current_option["questionId"] = option[0]
-            current_option["responseId"] = [
-                option[2]
+
+            current_option["answers"] = [
+
             ]
-            current_option["responseOption"] = [
-                option[3]
-            ]
+            
+            # current_option["responseOption"] = [
+            #     option[3]
+            # ]
             if response != [] and option[0] == response[-1]["questionId"]:
-                response[-1]["responseId"].append(option[2])
-                response[-1]["responseOption"].append(option[3])
+                response[-1]["answers"].append({
+                    "answerId": option[2],
+                    "responseOption" : option[3]
+                    }
+                    )
             else:
                 response.append(current_option)
                 current_option = {}
         return make_response(jsonify(response), 200)
+
+
+            #     # response[-1]["responseId"].append(option[2])
+            #     # response[-1]["responseOption"].append(option[3])
+       
     
                 
 
