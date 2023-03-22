@@ -18,16 +18,10 @@ def get_qa():
             current_option["title"] = option[5]
             current_option["description"] = option[6]
             current_option["question"] = option[1]
-            # current_option["responseOption"] = option[3]
+
             current_option["questionId"] = option[0]
-
             current_option["answers"] = [
-
             ]
-            
-            # current_option["responseOption"] = [
-            #     option[3]
-            # ]
             if response != [] and option[0] == response[-1]["questionId"]:
                 response[-1]["answers"].append({
                     "answerId": option[2],
@@ -38,54 +32,6 @@ def get_qa():
                 response.append(current_option)
                 current_option = {}
         return make_response(jsonify(response), 200)
-
-
-            #     # response[-1]["responseId"].append(option[2])
-            #     # response[-1]["responseOption"].append(option[3])
-       
-    
-                
-
-
-        #     print("the dictionary 1 is : " + str(response))
-        # return make_response(jsonify(response), 200)
-    # result = run_statement("CALL get_a(?)", [poll_id])
-    # if (type(result) == list):
-    #         for info in result:
-    #             response_data.append(dict(zip(keys, info)))
-    #             print("the dictionary 2 is : " + str(response_data))
-    # for (k1, v1), (k2, v2) in zip(response.items(), response_data.items()):
-    #     print(k1, '->', v1)
-    #     print(k2, '->', v2)           
-    #             for idx in range(len(keys1)):
-    #                 res[keys1[idx]] = vals2[idx]
-
-
-        
-
-@app.get('/api/poll-fuser')
-def complete_poll():
-    token = request.args.get("token")
-    if token == None:
-        return "You are not logged in. You must sign in to participate in this poll."
-    username = request.args.get("username")
-    poll_id = request.args.get("pollId")
-    response = []
-    keys = ["questionId", "responseId"]
-    result = run_statement("CALL get_q_and_a(?)", [poll_id])
-    if (type(result) == list):
-        for option in result:
-            response.append(dict(zip(keys, option)))
-        return make_response(jsonify(response), 200)
-
-    # if (type(result) == list):
-    #         for choice in result:
-    #         response.append(dict(zip(keys, choice)))
-
-            
-
-    #     return make_response(jsonify(response, values), 200)
-    
 
 @app.post('/api/poll-response-user')
 def user_response():

@@ -58,6 +58,19 @@ def add_questions():
         print(result)
 
         # result = run_statement("CALL create_choices")
+@app.get('/api/poll-public')
+def get_public_polls():
+    response = []
+    keys = ["pollId", "title", "description", "categoryName", "pollOwner", "expiry", "createdAt", "category"]
+    user_id = request.args.get("userId")
+    result = run_statement("CALL get_all_polls(?)", [user_id])
+    if (type(result) == list):
+        for polls in result:
+            response.append(dict(zip(keys, polls)))
+        return make_response(jsonify(response), 200)
+    else:
+        return "Something went wrong, please try again"
+
 
 @app.get('/api/poll')
 def get_polls():
@@ -125,7 +138,6 @@ def get_polls():
                 response.append(jsonify(response), 200)
             else:
                 response.append(jsonify(result), 500)
-    
     if token == None and cat_name == None and cat_id != None:
         result = run_statement("CALL get_polls_by_cat(?, ?)", [cat_id, cat_name])
         if (type(result) == list):
@@ -133,12 +145,6 @@ def get_polls():
                 response.append(jsonify(response), 200)
             else:
                 response.append(jsonify(result), 500)
-    
-                # else:
-                #     current_category = {}
-    #             response.append(dict(zip(keys, poll)))
-                
-    #         return make_response(jsonify(response), 200)
     else:
         return make_response(jsonify(response), 500)
 
@@ -146,14 +152,14 @@ def get_polls():
 def get_my_polls():
     token = request.args.get("token")
     username = request.args.get("username")
-    user_id = request.args.get("userId")
+    poll_id = request.args.get("pollId")
     response = []
-    keys = ["pollId", "title", "description", "categoryName", "pollOwner", "expiry", "createdAt", "category"]
+    keys = ["pollId", "title", "description", "categoryName", "pollOwner", "expiry", "createdAt", "questionId", "responseOption", "answerId"]
     if token != None:
         result = run_statement("CALL get_user_id(?, ?)", [username, token])
         if (type(result) == list):
             owner_id = result[0][0]
-            result = run_statement("CALL get_polls_by_owner(?)", [owner_id])
+            result = run_statement("CALL get_polls_by_owner(?, ?)", [owner_id, poll_id])
             if (type(result) == list):
                 for poll in result:
                     response.append(dict(zip(keys, poll)))
