@@ -7,6 +7,14 @@ import uuid
 @app.get('/api/poll-results')
 def get_results():
     poll_id = request.args.get('pollId')
+    response = []
+    keys = ["question", "responseOption"]
     result = run_statement("CALL get_results(?)", [poll_id])
     if (type(result) == list):
-        print(result)
+        for data in result:
+            response.append(dict(zip(keys, data)))
+        return make_response(jsonify(response), 200)
+    else:
+        return make_response(jsonify(result), 500)
+
+
