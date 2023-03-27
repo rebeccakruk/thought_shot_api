@@ -151,6 +151,8 @@ def get_polls():
 @app.get('/api/poll-owner')
 def get_my_polls():
     token = request.args.get("token")
+    if token == None:
+        return "You are not logged in. Please login to update your profile."
     username = request.args.get("username")
     poll_id = request.args.get("pollId")
     response = []
@@ -166,4 +168,21 @@ def get_my_polls():
             return make_response(jsonify(response), 200)
     else:
         return make_response(jsonify(response), 500)
+
+@app.delete('/api/poll-owner')
+def delete_poll():
+    token = request.json.get("token")
+    if token == None:
+        return "You are not logged in. Please login to update your profile."
+    username = request.json.get("username")
+    poll_id = request.json.get("pollId")
+    if token != None:
+        result = run_statement("CALL get_user_id(?, ?)", [username, token])
+        if (type(result) == list):
+            result = run_statement("CALL delete_poll(?)", [poll_id])
+            if result == None:
+                return "You have logged out successfully"
+        else:
+            return "Something went wrong, please try again."               
+
     
