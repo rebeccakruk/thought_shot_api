@@ -68,3 +68,41 @@ def run_statement(statement : str, args=[]):
     result = execute_statement(cursor, statement, args)
     disconnect_db(cursor)
     return result
+
+def executemany(cursor, statement, args=[]):
+    try:
+        cursor.executemany(statement, args)
+        results = cursor.fetchall()
+        return results
+    except mariadb.ProgrammingError as e:
+        if "doesn't have a result set" in str(e):
+            return None
+        print("Syntax error in your SQL statement:", e)
+        return str(e)
+    except mariadb.IntegrityError as e:
+        print("This statement failed to execute due to integrity error,", e)
+        return str(e)
+    except mariadb.DataError as e:
+        print("DATA ERROR:", e)
+        return str(e)
+    except Exception as e:
+        print("Unexpected error", e)
+        return str(e)
+
+def run_many(statement : str, args=[]):
+    """
+    This function expects a valid SQL statement and an optional list of arguments. It connect to the DB,
+    executes the statement and closes the connection.
+    If the connection to the DB fails, it returns None without running the statement.
+
+    Args:
+    statement (str): A valid SQL query
+    args (list, optional): The list of arguments. Defaults to [].
+    """
+    cursor = connect_db()
+    if (cursor == None):
+        print("Failed to connect to the DB, statement will not run")
+        return None
+    result = executemany(cursor, statement, args)
+    disconnect_db(cursor)
+    return result
